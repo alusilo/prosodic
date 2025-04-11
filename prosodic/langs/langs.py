@@ -336,9 +336,9 @@ def sylls_ipa_l_has_unstress(sylls_ipa_l):
     return any(syll_ipa_str_is_unstressed(syll_ipa_str) for syll_ipa_str in sylls_ipa_l)
 
 
-def sylls_ipa_l_is_unstressed(syll_ipa_l):
+def sylls_ipa_l_is_unstressed(sylls_ipa_l):
     return not any(
-        syll_ipa_str_is_stressed(syll_ipa_str) for syll_ipa_str in syll_ipa_l
+        syll_ipa_str_is_stressed(syll_ipa_str) for syll_ipa_str in sylls_ipa_l
     )
 
 
@@ -477,12 +477,16 @@ set_espeak_env()
 def Language(lang: str = DEFAULT_LANG):
     if lang == "en":
         from .english import EnglishLanguage
-
         return EnglishLanguage()
     if lang == "fi":
         from .finnish import FinnishLanguage
-
         return FinnishLanguage()
+    if lang == "es":
+        from .spanish import SpanishLanguage
+        return SpanishLanguage()
+    if lang == "de":
+        from .german import GermanLanguage
+        return GermanLanguage()
 
     lang_obj = LanguageModel()
     lang_obj.lang = lang
