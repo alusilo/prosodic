@@ -1,12 +1,11 @@
 import prosodic
 
-sentence = "Die Leute sind zufrieden und die Leute sind glücklich."
+sentence = "Der Himmel ist blau. Die Erde ist grün. Die Wiese ist grün."
 language = "de"
 
 sonnet = prosodic.Text(sentence, lang=language)
-for parse in sonnet.parses:
-    print(parse.__dict__)
-print(sonnet.df)
+
+# print(sonnet.df)
 for stanza in sonnet.stanzas:
     for line in stanza.lines:
         for word_token in line:

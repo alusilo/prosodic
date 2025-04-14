@@ -1,7 +1,7 @@
 from ...imports import *
 from ..langs import LanguageModel, get_sylls_ll
 from .german_annotator import make_annotation
-import re
+import pyphen
 from functools import cache
 from enum import Enum, auto
 from typing import List, Tuple, Dict, Optional, Union, Set
@@ -122,27 +122,38 @@ ipa2x = dict([("".join(v), k) for (k, v) in orth2phon.items()])
 class GermanLanguage(LanguageModel):
     pronunciation_dictionary_filename = os.path.join(PATH_DICTS, 'de', 'german.tsv')
     lang = 'de'
+    lang_espeak = 'de'
     cache_fn = 'german_wordtypes'
 
+    @cache
+    @profile
+    def get_sylls_text_l(self, token, num_sylls=None):
+        tokenl = token.lower()
+        dic = pyphen.Pyphen(lang=self.lang)
+        sylls = dic.inserted(tokenl).split('-')
+        sylls = [s for s in sylls]
+        return sylls
+
+    # TODO: Check if this is correct
     @cache
     def get_sylls_ll_rule(self, token):
         token = token.strip().lower()
         Annotation = make_annotation(token)
-        
-        # Check if any syllables are duplicated
-        syllables_unique = []
-        seen = set()
-        for syll in Annotation.syllables:
-            if syll not in seen:
-                syllables_unique.append(syll)
-                seen.add(syll)
-        
-        # If we detected duplicated syllables, recreate the annotation with deduplicated syllables
-        if len(syllables_unique) < len(Annotation.syllables):
-            # Create a new token by joining unique syllables
-            token_deduplicated = ''.join(syllables_unique)
-            Annotation = make_annotation(token_deduplicated)
-        
+
+        # # Check if any syllables are duplicated
+        # syllables_unique = []
+        # seen = set()
+        # for syll in Annotation.syllables:
+        #     if syll not in seen:
+        #         syllables_unique.append(syll)
+        #         seen.add(syll)
+        #
+        # # If we detected duplicated syllables, recreate the annotation with deduplicated syllables
+        # if len(syllables_unique) < len(Annotation.syllables):
+        #     # Create a new token by joining unique syllables
+        #     token_deduplicated = ''.join(syllables_unique)
+        #     Annotation = make_annotation(token_deduplicated)
+
         # Process syllables to IPA
         syllables = []
         for ij in range(len(Annotation.syllables)):
@@ -157,7 +168,7 @@ class GermanLanguage(LanguageModel):
             codaStr = sylldat[2].strip().lower()
             
             # Create the IPA transcription for this syllable
-            syllable_ipa = self.transcribe_syllable_parts(onsetStr, nucleusStr, codaStr, 
+            syllable_ipa = self.transcribe_syllable_parts(onsetStr, nucleusStr, codaStr,
                                                          is_final=(ij == len(Annotation.syllables) - 1))
             syllables.append(syllable_ipa)
 
@@ -175,7 +186,7 @@ class GermanLanguage(LanguageModel):
                 # Convert string to list of integers
                 stress_vals = [int(c) for c in stress if c.isdigit()]
                 
-            # Create stressed syllables 
+            # Create stressed syllables
             sylls_ipa = []
             for i in range(min(len(syllables), len(stress_vals))):
                 # Ensure stress value is valid (0, 1, or a 2 we can handle)

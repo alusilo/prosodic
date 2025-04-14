@@ -162,6 +162,7 @@ def syllabify(token):
     if not token:
         return []
     if len(token) <= 1:
+        print(f"Token too short to syllabify: {token}")
         return [token]
     
     # Define vowels and consonant groups
@@ -239,10 +240,10 @@ def syllabify(token):
                 split_point = len(consonants) - 1
                 syllables.append(token[start_idx:vowel_end + split_point])
                 start_idx = vowel_end + split_point
-    
+
     # Add final part if needed
-    if start_idx < len(token):
-        syllables.append(token[start_idx:])
+    # if start_idx < len(token):
+    #     syllables.append(token[start_idx:])
     
     # Check for repetitive patterns
     if len(syllables) >= 4:
